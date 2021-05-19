@@ -15,6 +15,7 @@ class FlowableActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_flowable)
 
+        //create disposable to keep track of all the observables
         compositeDisposable = CompositeDisposable()
 
         val list = listOf(1, 2, 3, 4, 5, 6, 7)
@@ -26,15 +27,17 @@ class FlowableActivity : AppCompatActivity() {
             .observeOn(AndroidSchedulers.mainThread()) //specify where results will be seen
             .subscribe { value ->    //do the work on thread...
                 value.map {
-                    it*2
+                    it*2  // even numbers
                 }
             }
+        //keep track of observables
         compositeDisposable.add(flowableData)
     }
 
     override fun onDestroy(){
         super.onDestroy()
+        compositeDisposable.dispose()  // destroy the observables
 
-        compositeDisposable.dispose()  //destroy the disposable
+        //note: if your are using a viewModel, disposable should track observables there
     }
 }

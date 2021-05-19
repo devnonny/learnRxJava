@@ -9,6 +9,7 @@ import com.cubenmax.framework.model.Task
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import java.util.function.Predicate
@@ -17,9 +18,14 @@ import java.util.function.Predicate
 class MainActivity : AppCompatActivity() {
 
     val TAG = "Main Activity"
+    private lateinit var compositeDisposable: CompositeDisposable
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        //create disposable to keep track of all the observables
+        compositeDisposable = CompositeDisposable()
 
         //create observable object - We want to observe a list of Tasks
         val taskObservable: Observable<Task> = Observable
@@ -48,6 +54,9 @@ class MainActivity : AppCompatActivity() {
             override fun onSubscribe(d: Disposable) {
                 Log.d(TAG, "onSubscribed : called." )
 
+                //add the the disposable to the list of disposable
+                compositeDisposable.add(d)
+
             }
             override fun onNext(task: Task) { // observer running on the main thread
                 Log.d(TAG, "onNext: : " + Thread.currentThread().name)
@@ -66,6 +75,15 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+
+    override fun onDestroy(){  // when the activity is no longer available
+        super.onDestroy()
+
+        compositeDisposable.dispose()  // destroy the observables
+
+        //note: if your are using a viewModel, disposable should track observables there
+    }
+
 }
 
 
