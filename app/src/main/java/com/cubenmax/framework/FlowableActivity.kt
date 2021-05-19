@@ -27,7 +27,7 @@ class FlowableActivity : AppCompatActivity() {
             .observeOn(AndroidSchedulers.mainThread()) //specify where results will be seen
             .subscribe { value ->    //do the work on thread...
                 value.map {
-                    it*2  // even numbers
+                    it*2  // create a list of even numbers
                 }
             }
         //keep track of observables
