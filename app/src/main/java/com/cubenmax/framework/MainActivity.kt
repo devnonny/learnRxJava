@@ -11,6 +11,7 @@ import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import java.util.function.Predicate
 
 
 class MainActivity : AppCompatActivity() {
@@ -24,11 +25,25 @@ class MainActivity : AppCompatActivity() {
         val taskObservable: Observable<Task> = Observable
             .fromIterable(DataSource.createTasksList())  // an operator to take the list of tasks and turn it to an observable
             .subscribeOn(Schedulers.io())   //specify a worker thread i.e tell it where the work will be done
+            //do the work on a background thread
+            .filter{task ->    //operator to show complete task, when task is complete, Observers will receive it
+
+                Log.d(TAG, "onNext: : " + Thread.currentThread().name) // this should show that it is working in a background thread
+                try{
+                    Thread.sleep(1000); // mimick freezing the thread
+                }catch(e: InterruptedException) {
+                    e.printStackTrace()
+                }
+                //task.isComplete()
+                task.isComplete
+            }
             .observeOn(AndroidSchedulers.mainThread()) //specify where results will be seen
 
 
 
-        //create an observer to observe the observable object(static methods are overriden)
+
+        //create an Observer to observe the observable object(static methods are overriden)
+        //this observer is observing on the main thread
         taskObservable.subscribe(object : Observer<Task> {
             override fun onSubscribe(d: Disposable) {
                 Log.d(TAG, "onSubscribed : called." )
@@ -52,3 +67,5 @@ class MainActivity : AppCompatActivity() {
         })
     }
 }
+
+
